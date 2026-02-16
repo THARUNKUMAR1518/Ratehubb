@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieHub - Movie Reviews</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>🎬 RateHub</h1>
+            </div>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search movies...">
+                <button id="searchBtn">Search</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h2>Discover Amazing Movies</h2>
+                <p>Find reviews, ratings, and details about your favorite films</p>
+            </div>
+        </section>
+
+        <section class="controls-section">
+            <div class="container controls-bar">
+                <div class="view-tabs" role="tablist" aria-label="Movie views">
+                    <button class="tab-btn active" data-view="popular" role="tab" aria-selected="true">🔥 Popular</button>
+                    <button class="tab-btn" data-view="top_rated" role="tab">⭐ Top Rated</button>
+                    <button class="tab-btn" data-view="now_playing" role="tab">🎟️ Now Playing</button>
+                    <button class="tab-btn" data-view="upcoming" role="tab">🗓️ Upcoming</button>
+                    <button class="tab-btn" data-view="top_10_week" role="tab">🏆 Top 10 This Week</button>
+                    <button class="tab-btn" data-view="watchlist" role="tab">❤️ Watchlist</button>
+                </div>
+                <div class="quick-filters">
+                    <select id="genreFilter" aria-label="Filter by genre">
+                        <option value="">All Genres</option>
+                    </select>
+                    <div class="range-filter">
+                        <label for="yearFrom">Year</label>
+                        <input type="number" id="yearFrom" placeholder="From" min="1900" max="2100">
+                        <input type="number" id="yearTo" placeholder="To" min="1900" max="2100">
+                    </div>
+                    <select id="sortSelect" aria-label="Sort movies">
+                        <option value="popularity.desc">Sort: Popularity</option>
+                        <option value="rating.desc">Rating: High to Low</option>
+                        <option value="rating.asc">Rating: Low to High</option>
+                        <option value="year.desc">Year: Newest</option>
+                        <option value="year.asc">Year: Oldest</option>
+                        <option value="title.asc">Title: A–Z</option>
+                        <option value="title.desc">Title: Z–A</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filter Toggle Button (Always Visible) -->
+        <div class="filter-toggle" id="filterToggle">
+            <span class="filter-icon">🔍</span>
+            <span class="filter-text">Filters</span>
+        </div>
+
+        <section class="filters-section">
+            <div class="container filters-content" id="filtersContent">
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label>🎭 Mood Filter:</label>
+                        <select id="moodFilter">
+                            <option value="">All Moods</option>
+                            <option value="happy">😊 Happy</option>
+                            <option value="sad">😢 Sad</option>
+                            <option value="horror">😱 Horror</option>
+                            <option value="action">💥 Action</option>
+                            <option value="romance">💕 Romance</option>
+                            <option value="comedy">😂 Comedy</option>
+                            <option value="thriller">🔥 Thriller</option>
+                            <option value="peaceful">🕊️ Peaceful</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>🏆 Awards Filter:</label>
+                        <select id="awardsFilter">
+                            <option value="">All Awards</option>
+                            <option value="oscar">🏆 Oscar Winners</option>
+                            <option value="golden-globe">🌟 Golden Globe</option>
+                            <option value="bafta">🎭 BAFTA</option>
+                            <option value="cannes">🎬 Cannes</option>
+                            <option value="critics-choice">⭐ Critics Choice</option>
+                            <option value="high-rated">📈 High Rated (8.0+)</option>
+                        </select>
+                    </div>
+                    <button id="applyFilters">Apply Filters</button>
+                    <button id="clearFilters">Clear</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="movies-section">
+            <div class="container">
+                <h3 id="moviesTitle">Popular Movies</h3>
+                <div class="results-meta">
+                    <span id="resultsCount">0 results</span>
+                </div>
+                <div id="moviesGrid" class="movies-grid"></div>
+                <div id="loading" class="loading">Loading...</div>
+                <div class="load-more-wrap">
+                    <button id="loadMoreBtn" class="load-more-btn">Load More</button>
+                </div>
+            </div>
+        </section>
+
+        <div id="movieModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="movieDetails"></div>
+            </div>
+        </div>
+
+        <!-- Chat Toggle Button (Always Visible) -->
+        <div class="chat-toggle" id="chatToggle">
+            <span class="chat-icon">💬</span>
+            <span class="chat-text">Chat</span>
+        </div>
+
+        <!-- Chatbot -->
+        <div id="chatbot" class="chatbot">
+            <div class="chatbot-header">
+                <span>🤖 Movie Assistant</span>
+            </div>
+            <div id="chatWindow" class="chat-window">
+                <div id="chatMessages" class="chat-messages">
+                    <div class="bot-message">Hi! Ask me about any movie details like "Tell me about Inception" or "What's the plot of Avatar?"</div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Ask about a movie...">
+                    <button id="sendBtn">Send</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 RateHub by Tharun. </p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
