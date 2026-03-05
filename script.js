@@ -1,7 +1,10 @@
 class MovieApp {
     constructor() {
         this.apiKey = '3fd2be6f0c70a2a598f084ddfb75487c'; // Free TMDb API key
-        this.baseUrl = '/api/tmdb';
+        // Use serverless function on Vercel, CORS proxy for local development
+        this.baseUrl = window.location.hostname.includes('vercel.app')
+            ? '/api/tmdb'
+            : 'https://corsproxy.io/?https://api.themoviedb.org/3';
         this.imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
         this.moviesGrid = document.getElementById('moviesGrid');
         this.searchInput = document.getElementById('searchInput');
@@ -94,7 +97,7 @@ class MovieApp {
 
     async loadGenres() {
         try {
-            const response = await fetch(`${this.baseUrl}/genre/movie/list?language=en-US`);
+            const response = await fetch(`${this.baseUrl}/genre/movie/list?api_key=${this.apiKey}&language=en-US`);
             const data = await response.json();
             if (data.genres) {
                 data.genres.forEach(genre => {
@@ -117,7 +120,7 @@ class MovieApp {
             let endpoint = '';
             let title = '';
             if (view === 'search') {
-                endpoint = `/search/movie?language=en-US&query=${encodeURIComponent(this.currentQuery)}&page=${page}`;
+                endpoint = `/search/movie?api_key=${this.apiKey}&language=en-US&query=${encodeURIComponent(this.currentQuery)}&page=${page}`;
                 title = `Search Results for "${this.currentQuery}"`;
             } else if (view === 'watchlist') {
                 this.renderWatchlist();
@@ -128,10 +131,10 @@ class MovieApp {
                 const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
                 const dateFrom = weekAgo.toISOString().split('T')[0];
                 const dateTo = today.toISOString().split('T')[0];
-                endpoint = `/discover/movie?language=en-US&sort_by=vote_average.desc&primary_release_date.gte=${dateFrom}&primary_release_date.lte=${dateTo}&vote_count.gte=100&page=1`;
+                endpoint = `/discover/movie?api_key=${this.apiKey}&language=en-US&sort_by=vote_average.desc&primary_release_date.gte=${dateFrom}&primary_release_date.lte=${dateTo}&vote_count.gte=100&page=1`;
                 title = this.getViewTitle(view);
             } else {
-                endpoint = `/movie/${view}?language=en-US&page=${page}`;
+                endpoint = `/movie/${view}?api_key=${this.apiKey}&language=en-US&page=${page}`;
                 title = this.getViewTitle(view);
             }
 
@@ -277,13 +280,13 @@ class MovieApp {
     async fetchMovieDetails(movieId) {
         try {
             const [movieResponse, creditsResponse, reviewsResponse, videosResponse, similarResponse, providersResponse, releasesResponse] = await Promise.all([
-                fetch(`${this.baseUrl}/movie/${movieId}?language=en-US`),
-                fetch(`${this.baseUrl}/movie/${movieId}/credits?language=en-US`),
-                fetch(`${this.baseUrl}/movie/${movieId}/reviews?language=en-US&page=1`),
-                fetch(`${this.baseUrl}/movie/${movieId}/videos?language=en-US`),
-                fetch(`${this.baseUrl}/movie/${movieId}/similar?language=en-US&page=1`),
-                fetch(`${this.baseUrl}/movie/${movieId}/watch/providers`),
-                fetch(`${this.baseUrl}/movie/${movieId}/release_dates`)
+                fetch(`${this.baseUrl}/movie/${movieId}?api_key=${this.apiKey}&language=en-US`),
+                fetch(`${this.baseUrl}/movie/${movieId}/credits?api_key=${this.apiKey}&language=en-US`),
+                fetch(`${this.baseUrl}/movie/${movieId}/reviews?api_key=${this.apiKey}&language=en-US&page=1`),
+                fetch(`${this.baseUrl}/movie/${movieId}/videos?api_key=${this.apiKey}&language=en-US`),
+                fetch(`${this.baseUrl}/movie/${movieId}/similar?api_key=${this.apiKey}&language=en-US&page=1`),
+                fetch(`${this.baseUrl}/movie/${movieId}/watch/providers?api_key=${this.apiKey}`),
+                fetch(`${this.baseUrl}/movie/${movieId}/release_dates?api_key=${this.apiKey}`)
             ]);
 
             const movie = await movieResponse.json();
@@ -929,7 +932,7 @@ class MovieApp {
         if (localMatch) return localMatch;
 
         try {
-            const response = await fetch(`${this.baseUrl}/search/movie?language=en-US&query=${encodeURIComponent(query)}&page=1`);
+            const response = await fetch(`${this.baseUrl}/search/movie?api_key=${this.apiKey}&language=en-US&query=${encodeURIComponent(query)}&page=1`);
             const data = await response.json();
             return data.results && data.results.length > 0 ? data.results[0] : null;
         } catch (error) {

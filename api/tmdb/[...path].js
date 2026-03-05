@@ -18,12 +18,12 @@ export default async function handler(req, res) {
     try {
         // Construct the full URL with the API key
         const queryString = new URLSearchParams(req.query);
-        // Remove path from query string since it's not a real query param
+        // Remove path and api_key from query string (we'll add api_key ourselves)
         queryString.delete('path');
+        queryString.delete('api_key');
         
         const queryParams = queryString.toString();
-        const separator = queryParams ? '&' : '?';
-        const url = `${tmdbBaseUrl}${path}?${queryParams}${separator}api_key=${apiKey}`;
+        const url = `${tmdbBaseUrl}${path}${queryParams ? '?' + queryParams + '&' : '?'}api_key=${apiKey}`;
         
         console.log('Fetching from TMDB:', url);
         
