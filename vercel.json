@@ -2,4 +2,3 @@
   "buildCommand": "echo 'Static site'",
   "outputDirectory": "."
 }
-

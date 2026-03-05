@@ -1,10 +1,9 @@
 class MovieApp {
     constructor() {
-        this.apiKey = '3fd2be6f0c70a2a598f084ddfb75487c'; // Free TMDb API key
-        // Use serverless function on Vercel, CORS proxy for local development
-        this.baseUrl = window.location.hostname.includes('vercel.app')
-            ? '/api/tmdb'
-            : 'https://corsproxy.io/?https://api.themoviedb.org/3';
+        this.apiKey = '3fd2be6f0c70a2a598f084ddfb75487c';
+        // Use CORS proxy with proper encoding
+        this.tmdbBaseUrl = 'https://api.themoviedb.org/3';
+        this.corsProxy = 'https://corsproxy.io/?';
         this.imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
         this.moviesGrid = document.getElementById('moviesGrid');
         this.searchInput = document.getElementById('searchInput');
@@ -33,6 +32,12 @@ class MovieApp {
         this.moviesTitle = document.getElementById('moviesTitle');
 
         this.init();
+    }
+
+    // Helper method to construct CORS-proxied URLs
+    proxyUrl(endpoint) {
+        const fullUrl = `${this.tmdbBaseUrl}${endpoint}`;
+        return `${this.corsProxy}${fullUrl}`;
     }
 
     init() {
@@ -97,7 +102,7 @@ class MovieApp {
 
     async loadGenres() {
         try {
-            const response = await fetch(`${this.baseUrl}/genre/movie/list?api_key=${this.apiKey}&language=en-US`);
+            const response = await fetch(this.proxyUrl(`/genre/movie/list?api_key=${this.apiKey}&language=en-US`));
             const data = await response.json();
             if (data.genres) {
                 data.genres.forEach(genre => {
@@ -138,7 +143,7 @@ class MovieApp {
                 title = this.getViewTitle(view);
             }
 
-            const response = await fetch(`${this.baseUrl}${endpoint}`);
+            const response = await fetch(this.proxyUrl(endpoint));
             const data = await response.json();
 
             if (data.results) {
@@ -280,13 +285,13 @@ class MovieApp {
     async fetchMovieDetails(movieId) {
         try {
             const [movieResponse, creditsResponse, reviewsResponse, videosResponse, similarResponse, providersResponse, releasesResponse] = await Promise.all([
-                fetch(`${this.baseUrl}/movie/${movieId}?api_key=${this.apiKey}&language=en-US`),
-                fetch(`${this.baseUrl}/movie/${movieId}/credits?api_key=${this.apiKey}&language=en-US`),
-                fetch(`${this.baseUrl}/movie/${movieId}/reviews?api_key=${this.apiKey}&language=en-US&page=1`),
-                fetch(`${this.baseUrl}/movie/${movieId}/videos?api_key=${this.apiKey}&language=en-US`),
-                fetch(`${this.baseUrl}/movie/${movieId}/similar?api_key=${this.apiKey}&language=en-US&page=1`),
-                fetch(`${this.baseUrl}/movie/${movieId}/watch/providers?api_key=${this.apiKey}`),
-                fetch(`${this.baseUrl}/movie/${movieId}/release_dates?api_key=${this.apiKey}`)
+                fetch(this.proxyUrl(`/movie/${movieId}?api_key=${this.apiKey}&language=en-US`)),
+                fetch(this.proxyUrl(`/movie/${movieId}/credits?api_key=${this.apiKey}&language=en-US`)),
+                fetch(this.proxyUrl(`/movie/${movieId}/reviews?api_key=${this.apiKey}&language=en-US&page=1`)),
+                fetch(this.proxyUrl(`/movie/${movieId}/videos?api_key=${this.apiKey}&language=en-US`)),
+                fetch(this.proxyUrl(`/movie/${movieId}/similar?api_key=${this.apiKey}&language=en-US&page=1`)),
+                fetch(this.proxyUrl(`/movie/${movieId}/watch/providers?api_key=${this.apiKey}`)),
+                fetch(this.proxyUrl(`/movie/${movieId}/release_dates?api_key=${this.apiKey}`))
             ]);
 
             const movie = await movieResponse.json();
@@ -932,7 +937,7 @@ class MovieApp {
         if (localMatch) return localMatch;
 
         try {
-            const response = await fetch(`${this.baseUrl}/search/movie?api_key=${this.apiKey}&language=en-US&query=${encodeURIComponent(query)}&page=1`);
+            const response = await fetch(this.proxyUrl(`/search/movie?api_key=${this.apiKey}&language=en-US&query=${encodeURIComponent(query)}&page=1`));
             const data = await response.json();
             return data.results && data.results.length > 0 ? data.results[0] : null;
         } catch (error) {
