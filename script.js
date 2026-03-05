@@ -49,8 +49,9 @@ class MovieApp {
     // Helper method to construct proxied URLs
     proxyUrl(endpoint) {
         if (this.isVercel) {
-            // On Vercel: use serverless function
-            return `${this.baseUrl}${endpoint}`;
+            // On Vercel: /api/movies/... catch-all route
+            // endpoint is like: /genre/movie/list?api_key=...&language=en-US
+            return `/api/movies${endpoint}`;
         } else {
             // Locally: use CORS proxy
             const fullUrl = `${this.tmdbBaseUrl}${endpoint}`;
