@@ -3,11 +3,11 @@ class MovieApp {
         this.apiKey = '3fd2be6f0c70a2a598f084ddfb75487c';
         this.tmdbBaseUrl = 'https://api.themoviedb.org/3';
         this.imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
-        
+
         // Detect if we're on Vercel
         const isVercel = window.location.hostname.includes('vercel.app');
         this.isVercel = isVercel;
-        
+
         // Set proxy based on environment
         if (isVercel) {
             this.proxyBase = '/api/fetch?url=';
@@ -53,6 +53,7 @@ class MovieApp {
         this.loadGenres();
         this.loadView('popular');
         this.setupEventListeners();
+        this.loadSidebarTopRated();
     }
 
     setupEventListeners() {
@@ -71,13 +72,26 @@ class MovieApp {
             btn.addEventListener('click', () => this.switchView(btn.dataset.view));
         });
 
-        document.querySelector('.close').addEventListener('click', () => {
-            this.modal.style.display = 'none';
-        });
+        const navWatchlist = document.getElementById('navWatchlist');
+        if (navWatchlist) {
+            navWatchlist.addEventListener('click', () => {
+                this.switchView('watchlist');
+            });
+        }
+
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', () => {
+                this.modal.style.display = 'none';
+            });
+        }
 
         window.addEventListener('click', (e) => {
             if (e.target === this.modal) {
                 this.modal.style.display = 'none';
+            }
+            if (e.target === this.authModal) {
+                this.authModal.style.display = 'none';
             }
         });
 
@@ -85,6 +99,11 @@ class MovieApp {
         document.getElementById('chatToggle').addEventListener('click', () => {
             this.toggleChat();
         });
+
+        const closeChat = document.getElementById('closeChat');
+        if (closeChat) {
+            closeChat.addEventListener('click', () => this.toggleChat());
+        }
 
         document.getElementById('sendBtn').addEventListener('click', () => {
             this.sendMessage();
@@ -95,18 +114,98 @@ class MovieApp {
         });
 
         // Filter events
-        document.getElementById('applyFilters').addEventListener('click', () => {
-            this.applyFiltersAndRender();
-        });
+        const applyFiltersBtn = document.getElementById('applyFilters');
+        if (applyFiltersBtn) {
+            applyFiltersBtn.addEventListener('click', () => {
+                this.applyFiltersAndRender();
+            });
+        }
 
-        document.getElementById('clearFilters').addEventListener('click', () => {
-            this.clearFilters();
-        });
+        const clearFiltersBtn = document.getElementById('clearFilters');
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', () => {
+                this.clearFilters();
+            });
+        }
 
         // Filter toggle events
-        document.getElementById('filterToggle').addEventListener('click', () => {
-            this.toggleFilters();
+        const filterToggleBtn = document.getElementById('filterToggle');
+        if (filterToggleBtn) {
+            filterToggleBtn.addEventListener('click', () => {
+                this.toggleFilters();
+            });
+        }
+
+        // Auth Modal Events
+        this.authModal = document.getElementById('authModal');
+        this.isSignUpMode = false;
+
+        document.querySelectorAll('.auth-trigger-btn, .sign-in-link').forEach(btn => {
+            btn.addEventListener('click', () => this.toggleAuthModal());
         });
+
+        const closeAuthBtn = document.getElementById('closeAuthBtn');
+        if (closeAuthBtn) {
+            closeAuthBtn.addEventListener('click', () => {
+                this.authModal.style.display = 'none';
+            });
+        }
+
+        const authSwitchBtn = document.getElementById('authSwitchBtn');
+        if (authSwitchBtn) {
+            authSwitchBtn.addEventListener('click', () => {
+                this.isSignUpMode = !this.isSignUpMode;
+                document.getElementById('authTitle').textContent = this.isSignUpMode ? 'Create Account' : 'Sign In';
+                document.getElementById('authSubmitBtn').textContent = this.isSignUpMode ? 'Create Account' : 'Sign In';
+                document.getElementById('authSwitchText').innerHTML = this.isSignUpMode ?
+                    'Already have an account? <span id="authSwitchBtn" style="color:var(--link-blue); cursor:pointer; font-weight:bold;">Sign In</span>' :
+                    'New to RateHub? <span id="authSwitchBtn" style="color:var(--link-blue); cursor:pointer; font-weight:bold;">Create an account</span>';
+
+                // Re-attach listener to newly created span
+                document.getElementById('authSwitchBtn').addEventListener('click', () => authSwitchBtn.click());
+            });
+        }
+    }
+
+    toggleAuthModal() {
+        if (this.authModal) {
+            this.authModal.style.display = 'flex';
+        }
+    }
+
+    async loadSidebarTopRated() {
+        try {
+            const response = await fetch(this.proxyUrl(`/movie/top_rated?api_key=${this.apiKey}&language=en-US&page=1`));
+            const data = await response.json();
+
+            if (data.results) {
+                const listContainer = document.getElementById('sidebarTopRatedList');
+                if (!listContainer) return;
+
+                listContainer.innerHTML = '';
+                const topMovies = data.results.slice(0, 12);
+
+                topMovies.forEach(movie => {
+                    const posterUrl = movie.poster_path ? `${this.imageBaseUrl}${movie.poster_path}` : 'https://via.placeholder.com/60x90?text=No+Image';
+                    const item = document.createElement('div');
+                    item.className = 'sidebar-list-item';
+                    item.onclick = () => this.showMovieDetails(movie.id);
+
+                    item.innerHTML = `
+                        <img src="${posterUrl}" alt="${movie.title}" class="sidebar-list-item-img" onerror="this.src='https://via.placeholder.com/60x90?text=No+Image'">
+                        <div class="sidebar-list-item-info">
+                            <div class="sidebar-list-item-title">${movie.title}</div>
+                            <div class="sidebar-list-item-rating">
+                                <span class="star">★</span> ${movie.vote_average.toFixed(1)}
+                            </div>
+                        </div>
+                    `;
+                    listContainer.appendChild(item);
+                });
+            }
+        } catch (e) {
+            console.error("Failed to load sidebar", e);
+        }
     }
 
     async loadGenres() {
@@ -350,38 +449,51 @@ class MovieApp {
     createMovieCard(movie) {
         const card = document.createElement('div');
         card.className = 'movie-card';
-        card.onclick = () => this.showMovieDetails(movie.id);
 
         const posterUrl = movie.poster_path ? `${this.imageBaseUrl}${movie.poster_path}` : 'https://via.placeholder.com/300x450?text=No+Image';
         const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
-        const year = movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A';
-        const stars = this.renderStars(movie.vote_average);
         const isWatchlisted = this.isInWatchlist(movie.id);
 
         card.innerHTML = `
-            <img src="${posterUrl}" alt="${movie.title}" class="movie-poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-            <div class="movie-info">
-                <div class="movie-title">${movie.title}</div>
-                <div class="movie-year">${year}</div>
-                <div class="movie-rating">⭐ ${rating}</div>
-                <div class="movie-actions">
-                    <div class="star-rating" aria-label="${rating} out of 10">
-                        ${stars}
-                    </div>
-                    <button class="watchlist-btn ${isWatchlisted ? 'active' : ''}" data-id="${movie.id}">
-                        ${isWatchlisted ? '❤️ Saved' : '🤍 Watchlist'}
+            <div class="poster-wrapper">
+                <img src="${posterUrl}" alt="${movie.title}" class="movie-poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                <div class="watchlist-ribbon ${isWatchlisted ? 'active' : ''}" data-id="${movie.id}"></div>
+            </div>
+            <div class="card-content">
+                <div class="card-rating">
+                    <span class="star">★</span>
+                    <span>${rating}</span>
+                    <button class="rate-button toggle-rate-btn">☆ Rate</button>
+                </div>
+                <h3 class="card-title">${movie.title}</h3>
+                <div class="card-actions">
+                    <button class="btn-watchlist-full toggle-watch-btn" data-id="${movie.id}">
+                        ${isWatchlisted ? 'Remove Watchlist' : '+ Watchlist'}
                     </button>
                 </div>
             </div>
         `;
 
-        const watchlistBtn = card.querySelector('.watchlist-btn');
-        watchlistBtn.addEventListener('click', (e) => {
+        card.onclick = (e) => {
+            if (!e.target.closest('.watchlist-ribbon') && !e.target.closest('.toggle-watch-btn') && !e.target.closest('.toggle-rate-btn')) {
+                this.showMovieDetails(movie.id);
+            }
+        };
+
+        const toggleList = (e) => {
             e.stopPropagation();
             this.toggleWatchlist(movie);
-            watchlistBtn.classList.toggle('active', this.isInWatchlist(movie.id));
-            watchlistBtn.textContent = this.isInWatchlist(movie.id) ? '❤️ Saved' : '🤍 Watchlist';
-        });
+            const inList = this.isInWatchlist(movie.id);
+            const ribbon = card.querySelector('.watchlist-ribbon');
+            const watchBtn = card.querySelector('.toggle-watch-btn');
+            if (ribbon) ribbon.classList.toggle('active', inList);
+            if (watchBtn) watchBtn.textContent = inList ? 'Remove Watchlist' : '+ Watchlist';
+        };
+
+        const ribbon = card.querySelector('.watchlist-ribbon');
+        const watchBtn = card.querySelector('.toggle-watch-btn');
+        if (ribbon) ribbon.addEventListener('click', toggleList);
+        if (watchBtn) watchBtn.addEventListener('click', toggleList);
 
         return card;
     }
@@ -557,7 +669,9 @@ class MovieApp {
             return `
                 <div class="cast-card">
                     <img src="${photo}" alt="${actor.name}" onerror="this.src='https://via.placeholder.com/200x300?text=No+Image'">
-                    <div class="cast-name">${actor.name}</div>
+                    <div class="cast-info">
+                        <div class="name">${actor.name}</div>
+                    </div>
                 </div>
             `;
         }).join('');
@@ -596,65 +710,114 @@ class MovieApp {
         `;
 
         modalContent.innerHTML = `
-            <div class="movie-details">
-                <img src="${posterUrl}" alt="${movie.title}" class="movie-poster-large" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                <div class="movie-info-detailed">
-                    <div class="title-with-rating">
-                        <h2 class="movie-title-large">${movie.title}</h2>
-                        ${certification ? `<span class="age-rating-badge">${certification}</span>` : ''}
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <h2 id="modalTitle">${movie.title}</h2>
+                    <div class="modal-meta" id="modalMeta">
+                        <span>${new Date(movie.release_date).getFullYear()}</span>
+                        ${certification ? `<span>${certification}</span>` : ''}
+                        <span>${runtime}</span>
                     </div>
-                    <div class="movie-meta">
-                        <span class="meta-item">📅 ${new Date(movie.release_date).getFullYear()}</span>
-                        <span class="meta-item">⏱️ ${runtime}</span>
-                        <span class="meta-item">🎭 ${genres}</span>
-                        <span class="meta-item">⭐ ${movie.vote_average.toFixed(1)}/10</span>
-                        <span class="meta-item">👥 ${movie.vote_count} votes</span>
-                        <span class="meta-item">💰 Budget: ${budget}</span>
-                        <span class="meta-item">📦 Box Office: ${revenue}</span>
-                    </div>
-                    <button class="overview-btn" id="overviewBtn-${movie.id}" data-revenue="${movie.revenue || 0}">Overview: Country Collection</button>
-                    <div id="collectionGraph-${movie.id}" class="collection-graph" style="display:none;"></div>
-                    ${providersHtml}
-                    ${languagesHtml}
-                    <div class="rating-meter">
-                        <strong>IMDb-style Rating Meter</strong>
-                        <div class="meter-bar">
-                            <div class="meter-fill" style="width: ${ratingPercent}%;"></div>
-                        </div>
-                        <div class="user-rating" data-movie-id="${movie.id}">
-                            <span>Your Rating:</span>
-                            ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(value => `
-                                <button class="star-btn ${userRating >= value ? 'active' : ''}" data-rating="${value}">★</button>
-                            `).join('')}
-                            <span>${userRating ? userRating + '/10' : 'Not rated'}</span>
+                </div>
+                <div class="modal-ratings-area" id="modalRatings">
+                    <div class="rating-block">
+                        <div class="rating-title">IMDb RATING</div>
+                        <div class="rating-score">
+                            <span class="star">★</span>
+                            <div>
+                                <span>${movie.vote_average.toFixed(1)}</span><span class="dim">/10</span>
+                                <div class="dim" style="font-size: 0.8rem;">${movie.vote_count}</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="movie-summary">
-                        <div class="summary-title">Quick Summary:</div>
-                        ${summary}
+                    <div class="rating-block">
+                        <div class="rating-title">YOUR RATING</div>
+                        <div class="rating-score user-rating" data-movie-id="${movie.id}">
+                            ${userRating ?
+                `<span class="star" style="color:var(--link-blue)">★</span><span style="font-size:1.2rem">${userRating}</span><span class="dim" style="font-size:0.9rem">/10</span>`
+                :
+                `<span class="rate-action" id="rateActionBtn-${movie.id}">☆ Rate</span>
+                                 <div class="user-rating-stars" id="rateStars-${movie.id}" style="display:none;">
+                                    ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(value => `<button class="star-btn" data-rating="${value}">★</button>`).join('')}
+                                 </div>`
+            }
+                        </div>
                     </div>
-                    <div class="movie-plot">
-                        <strong>Full Plot:</strong><br>
+                </div>
+            </div>
+            <div class="modal-body" id="movieDetailsBody">
+                <div class="modal-poster-col">
+                    <img src="${posterUrl}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                </div>
+                <div class="modal-info-col">
+                    <div class="genres-row">
+                        ${movie.genres.map(g => `<span class="genre-badge">${g.name}</span>`).join('')}
+                    </div>
+                    <div class="plot-text">
                         ${movie.overview || 'No plot available'}
                     </div>
-                    <div class="movie-cast">
-                        <div class="cast-title">Director:</div>
-                        <div>${director ? director.name : 'N/A'}</div>
+                    <div class="cast-crew-preview">
+                        <div class="credit-row">
+                            <div class="credit-label">Director</div>
+                            <div class="credit-names">${director ? director.name : 'N/A'}</div>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-label">Writers</div>
+                            <div class="credit-names">${credits.crew.filter(c => c.department === 'Writing').slice(0, 3).map(w => w.name).join(', ') || 'N/A'}</div>
+                        </div>
+                        <div class="credit-row">
+                            <div class="credit-label">Stars</div>
+                            <div class="credit-names">${cast || 'N/A'}</div>
+                        </div>
                     </div>
-                    <div class="movie-cast">
-                        <div class="cast-title">Cast:</div>
-                        <div>${cast || 'N/A'}</div>
-                        <div class="cast-grid">${castGrid}</div>
+                    
+                    <div class="section-divider"></div>
+                    ${providersHtml.replace('cast-title', 'section-heading').replace('Available on OTT:', 'Available to Stream').replace('Available to Rent:', 'Available to Rent').replace('Available to Buy:', 'Available to Buy')}
+
+                    <div class="section-divider"></div>
+
+                    <h3 class="section-heading">Top cast</h3>
+                    <div class="cast-grid">
+                        ${castGrid}
                     </div>
-                    ${awardsHtml}
-                    ${reviewsHtml}
-                    ${userReviewsHtml}
-                    ${trailerHtml}
-                    ${similarHtml}
+                    
+                    ${awardsHtml ? `<div class="section-divider"></div>${awardsHtml.replace('movie-awards', '').replace('cast-title', 'section-heading').replace('Awards & Nominations:', 'Awards').replace('Awards & Recognition:', 'Awards')}` : ''}
+                    
+                    ${trailerHtml ? `<div class="section-divider"></div><h3 class="section-heading">Videos</h3>${trailerHtml.replace('trailer-section', '').replace('<div class="cast-title">Official Trailer:</div>', '')}` : ''}
+                    
+                    ${similarHtml ? `<div class="section-divider"></div><h3 class="section-heading">More like this</h3>${similarHtml.replace('similar-movies', '').replace('<div class="cast-title">Similar Movies:</div>', '')}` : ''}
+                    
+                    <div class="section-divider"></div>
+                    <h3 class="section-heading">User Reviews</h3>
                     <div class="review-form">
-                        <div class="cast-title">Add Your Review:</div>
-                        <textarea id="userReviewText-${movie.id}" placeholder="Share your thoughts..."></textarea>
-                        <button id="submitReviewBtn-${movie.id}">Submit Review</button>
+                        <textarea id="userReviewText-${movie.id}" placeholder="Write a review..."></textarea>
+                        <button id="submitReviewBtn-${movie.id}">Submit</button>
+                    </div>
+                    ${userReviewsHtml.replace('movie-reviews', '').replace('<div class="cast-title">Your Reviews:</div>', '')}
+                    ${reviewsHtml.replace('movie-reviews', '').replace('<div class="cast-title">Reviews:</div>', '')}
+                    
+                    <div class="section-divider"></div>
+                    <h3 class="section-heading">Box office</h3>
+                    <div class="credit-row">
+                        <div class="credit-label" style="width: 150px;">Budget</div>
+                        <div class="credit-names" style="color:var(--text-primary)">${budget}</div>
+                    </div>
+                    <div class="credit-row">
+                        <div class="credit-label" style="width: 150px;">Gross worldwide</div>
+                        <div class="credit-names" style="color:var(--text-primary)">${revenue}</div>
+                    </div>
+                    <button class="btn-secondary" style="margin-top:1rem;" id="overviewBtn-${movie.id}" data-revenue="${movie.revenue || 0}">Collection Breakdown</button>
+                    <div id="collectionGraph-${movie.id}" class="collection-graph" style="display:none; margin-top:1rem;"></div>
+
+                    <div class="section-divider"></div>
+                    <h3 class="section-heading">Details</h3>
+                    <div class="credit-row">
+                        <div class="credit-label" style="width: 150px;">Release date</div>
+                        <div class="credit-names" style="color:var(--text-primary)">${new Date(movie.release_date).toLocaleDateString()}</div>
+                    </div>
+                    <div class="credit-row">
+                        <div class="credit-label" style="width: 150px;">Language</div>
+                        <div class="credit-names" style="color:var(--text-primary)">${originalLanguage}</div>
                     </div>
                 </div>
             </div>
@@ -673,8 +836,21 @@ class MovieApp {
                     ratingContainer.querySelectorAll('.star-btn').forEach(star => {
                         star.classList.toggle('active', parseInt(star.dataset.rating, 10) <= rating);
                     });
-                    ratingContainer.querySelector('span:last-child').textContent = `${rating}/10`;
+
+                    // After rating, reload the modal to show the new state
+                    setTimeout(() => {
+                        this.showMovieDetails(movieId);
+                    }, 500);
                 });
+            });
+        }
+
+        const rateBtn = document.getElementById(`rateActionBtn-${movieId}`);
+        const rateStars = document.getElementById(`rateStars-${movieId}`);
+        if (rateBtn && rateStars) {
+            rateBtn.addEventListener('click', () => {
+                rateBtn.style.display = 'none';
+                rateStars.style.display = 'flex';
             });
         }
 
@@ -1033,32 +1209,20 @@ class MovieApp {
     }
 
     toggleFilters() {
-        const filtersSection = document.querySelector('.filters-section');
-        const filterToggle = document.getElementById('filterToggle');
-        const filterIcon = filterToggle.querySelector('.filter-icon');
-
-        filtersSection.classList.toggle('show-filters');
-
-        // Change icon based on visibility
-        if (filtersSection.classList.contains('show-filters')) {
-            filterIcon.textContent = '✖️';
-        } else {
-            filterIcon.textContent = '🔍';
+        const filtersSection = document.getElementById('filtersContent');
+        if (filtersSection) {
+            if (filtersSection.style.display === 'none' || !filtersSection.style.display) {
+                filtersSection.style.display = 'block';
+            } else {
+                filtersSection.style.display = 'none';
+            }
         }
     }
 
     toggleChat() {
         const chatbot = document.getElementById('chatbot');
-        const chatToggle = document.getElementById('chatToggle');
-        const chatIcon = chatToggle.querySelector('.chat-icon');
-
-        chatbot.classList.toggle('show-chat');
-
-        // Change icon based on visibility
-        if (chatbot.classList.contains('show-chat')) {
-            chatIcon.textContent = '✖️';
-        } else {
-            chatIcon.textContent = '💬';
+        if (chatbot) {
+            chatbot.classList.toggle('active');
         }
     }
 

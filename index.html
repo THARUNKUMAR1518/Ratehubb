@@ -1,142 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieHub - Movie Reviews</title>
+    <title>RateHub - Movie Database</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <header>
-        <nav class="navbar">
+    <header class="imdb-header">
+        <div class="header-content">
             <div class="nav-brand">
-                <h1>🎬 RateHub</h1>
+                <h1 class="logo">RateHub</h1>
             </div>
+
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Search movies...">
-                <button id="searchBtn">Search</button>
+                <div class="search-box">
+                    <select id="searchCategory" class="search-category">
+                        <option value="all">All</option>
+                        <option value="titles">Titles</option>
+                    </select>
+                    <input type="text" id="searchInput" placeholder="Search RateHub">
+                    <button id="searchBtn" class="search-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
-        </nav>
+
+            <div class="header-actions">
+                <div class="header-link watchlist-link" id="navWatchlist">
+                    <span class="icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z" />
+                        </svg>
+                    </span>
+                    <span class="text">Watchlist</span>
+                </div>
+                <div class="header-link sign-in-link">
+                    <span class="text">Sign In</span>
+                </div>
+            </div>
+        </div>
     </header>
 
-    <main>
-        <section class="hero">
-            <div class="hero-content">
-                <h2>Discover Amazing Movies</h2>
-                <p>Find reviews, ratings, and details about your favorite films</p>
-            </div>
-        </section>
-
-        <section class="controls-section">
-            <div class="container controls-bar">
-                <div class="view-tabs" role="tablist" aria-label="Movie views">
-                    <button class="tab-btn active" data-view="popular" role="tab" aria-selected="true">🔥 Popular</button>
-                    <button class="tab-btn" data-view="top_rated" role="tab">⭐ Top Rated</button>
-                    <button class="tab-btn" data-view="now_playing" role="tab">🎟️ Now Playing</button>
-                    <button class="tab-btn" data-view="upcoming" role="tab">🗓️ Upcoming</button>
-                    <button class="tab-btn" data-view="top_10_week" role="tab">🏆 Top 10 This Week</button>
-                    <button class="tab-btn" data-view="watchlist" role="tab">❤️ Watchlist</button>
-                </div>
-                <div class="quick-filters">
-                    <select id="genreFilter" aria-label="Filter by genre">
-                        <option value="">All Genres</option>
-                    </select>
-                    <div class="range-filter">
-                        <label for="yearFrom">Year</label>
-                        <input type="number" id="yearFrom" placeholder="From" min="1900" max="2100">
-                        <input type="number" id="yearTo" placeholder="To" min="1900" max="2100">
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-wrapper">
+                <div class="hero-main" style="width:100%;">
+                    <div class="hero-text">
+                        <h2>Discover Amazing Movies</h2>
+                        <p>Find reviews, ratings, and details about your favorite films</p>
                     </div>
-                    <select id="sortSelect" aria-label="Sort movies">
-                        <option value="popularity.desc">Sort: Popularity</option>
-                        <option value="rating.desc">Rating: High to Low</option>
-                        <option value="rating.asc">Rating: Low to High</option>
-                        <option value="year.desc">Year: Newest</option>
-                        <option value="year.asc">Year: Oldest</option>
-                        <option value="title.asc">Title: A–Z</option>
-                        <option value="title.desc">Title: Z–A</option>
-                    </select>
                 </div>
             </div>
         </section>
 
-        <!-- Filter Toggle Button (Always Visible) -->
-        <div class="filter-toggle" id="filterToggle">
-            <span class="filter-icon">🔍</span>
-            <span class="filter-text">Filters</span>
+        <!-- Main Content Area -->
+        <div class="content-wrapper">
+            <div class="main-column">
+                <section class="explore-section">
+                    <div class="section-header">
+                        <h2 id="moviesTitle" class="section-title">Popular Movies</h2>
+                        <div class="subtitle">What to watch</div>
+                    </div>
+
+                    <div class="controls-bar">
+                        <div class="view-tabs" role="tablist">
+                            <button class="tab-btn active" data-view="popular">Popular</button>
+                            <button class="tab-btn" data-view="top_rated">Top Rated</button>
+                            <button class="tab-btn" data-view="now_playing">Now Playing</button>
+                            <button class="tab-btn" data-view="upcoming">Upcoming</button>
+                            <button class="tab-btn hidden-tab" data-view="watchlist"
+                                id="hiddenWatchlistTab">Watchlist</button>
+                        </div>
+
+                        <div class="filter-actions">
+                            <button class="action-btn" id="filterToggle">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    style="vertical-align: middle; margin-right: 4px;">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                                </svg>
+                                Filters
+                            </button>
+                            <select id="sortSelect" class="sort-select">
+                                <option value="popularity.desc">Popularity</option>
+                                <option value="rating.desc">Rating: High to Low</option>
+                                <option value="rating.asc">Rating: Low to High</option>
+                                <option value="year.desc">Year: Newest</option>
+                                <option value="year.asc">Year: Oldest</option>
+                                <option value="title.asc">A–Z</option>
+                                <option value="title.desc">Z–A</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filters-panel" id="filtersContent" style="display: none;">
+                        <div class="filter-grid">
+                            <div class="filter-group">
+                                <label>Genre</label>
+                                <select id="genreFilter">
+                                    <option value="">All Genres</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Mood</label>
+                                <select id="moodFilter">
+                                    <option value="">All Moods</option>
+                                    <option value="happy">Happy</option>
+                                    <option value="sad">Sad</option>
+                                    <option value="horror">Horror</option>
+                                    <option value="action">Action</option>
+                                    <option value="romance">Romance</option>
+                                    <option value="comedy">Comedy</option>
+                                    <option value="thriller">Thriller</option>
+                                    <option value="peaceful">Peaceful</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Awards</label>
+                                <select id="awardsFilter">
+                                    <option value="">All Awards</option>
+                                    <option value="oscar">Oscar Winners</option>
+                                    <option value="golden-globe">Golden Globe</option>
+                                    <option value="bafta">BAFTA</option>
+                                    <option value="cannes">Cannes</option>
+                                    <option value="critics-choice">Critics Choice</option>
+                                    <option value="high-rated">High Rated (8.0+)</option>
+                                </select>
+                            </div>
+                            <div class="filter-group range-group">
+                                <label>Year</label>
+                                <div class="year-inputs">
+                                    <input type="number" id="yearFrom" placeholder="From" min="1900" max="2100">
+                                    <span>-</span>
+                                    <input type="number" id="yearTo" placeholder="To" min="1900" max="2100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-buttons">
+                            <button id="applyFilters" class="btn-primary">Apply</button>
+                            <button id="clearFilters" class="btn-secondary">Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="results-meta">
+                        <span id="resultsCount">0 titles</span>
+                    </div>
+
+                    <div id="moviesGrid" class="movies-grid"></div>
+
+                    <div id="loading" class="loading">
+                        <div class="spinner"></div>
+                    </div>
+
+                    <div class="load-more-wrap">
+                        <button id="loadMoreBtn" class="load-more-btn">Load More</button>
+                    </div>
+                </section>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-widget">
+                    <h3>More to explore</h3>
+                    <div class="widget-content">
+                        <p style="margin-bottom: 1rem; font-size: 0.9rem; color: #ccc;">Sign in to access your Watchlist
+                        </p>
+                        <button class="btn-secondary auth-trigger-btn" style="width: 100%;">Sign In</button>
+                    </div>
+                </div>
+                <!-- Dynamic highly rated widget will be injected here by JS -->
+                <div class="sidebar-widget" id="topRatedSidebarWidget" style="margin-top:2rem;">
+                    <h3>Top Rated Classics</h3>
+                    <div class="widget-content" id="sidebarTopRatedList">
+                        <p style="color: #666; font-size: 0.9rem;">Loading top rated...</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <section class="filters-section">
-            <div class="container filters-content" id="filtersContent">
-                <div class="filters-container">
-                    <div class="filter-group">
-                        <label>🎭 Mood Filter:</label>
-                        <select id="moodFilter">
-                            <option value="">All Moods</option>
-                            <option value="happy">😊 Happy</option>
-                            <option value="sad">😢 Sad</option>
-                            <option value="horror">😱 Horror</option>
-                            <option value="action">💥 Action</option>
-                            <option value="romance">💕 Romance</option>
-                            <option value="comedy">😂 Comedy</option>
-                            <option value="thriller">🔥 Thriller</option>
-                            <option value="peaceful">🕊️ Peaceful</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>🏆 Awards Filter:</label>
-                        <select id="awardsFilter">
-                            <option value="">All Awards</option>
-                            <option value="oscar">🏆 Oscar Winners</option>
-                            <option value="golden-globe">🌟 Golden Globe</option>
-                            <option value="bafta">🎭 BAFTA</option>
-                            <option value="cannes">🎬 Cannes</option>
-                            <option value="critics-choice">⭐ Critics Choice</option>
-                            <option value="high-rated">📈 High Rated (8.0+)</option>
-                        </select>
-                    </div>
-                    <button id="applyFilters">Apply Filters</button>
-                    <button id="clearFilters">Clear</button>
-                </div>
-            </div>
-        </section>
-
-        <section class="movies-section">
-            <div class="container">
-                <h3 id="moviesTitle">Popular Movies</h3>
-                <div class="results-meta">
-                    <span id="resultsCount">0 results</span>
-                </div>
-                <div id="moviesGrid" class="movies-grid"></div>
-                <div id="loading" class="loading">Loading...</div>
-                <div class="load-more-wrap">
-                    <button id="loadMoreBtn" class="load-more-btn">Load More</button>
-                </div>
-            </div>
-        </section>
-
+        <!-- Movie Details Modal -->
         <div id="movieModal" class="modal">
             <div class="modal-content">
-                <span class="close">&times;</span>
-                <div id="movieDetails"></div>
+                <span class="close" id="closeModalBtn">&times;</span>
+                <div id="movieDetails">
+                    <!-- Dynamic content filled by JS -->
+                </div>
             </div>
         </div>
 
-        <!-- Chat Toggle Button (Always Visible) -->
+        <!-- Auth Modal -->
+        <div id="authModal" class="auth-modal">
+            <div class="auth-content">
+                <button class="close-auth" id="closeAuthBtn">&times;</button>
+                <div class="auth-header">
+                    <h2 id="authTitle">Sign In</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">To access your Watchlist and Ratings</p>
+                </div>
+                <form id="authForm" onsubmit="event.preventDefault();">
+                    <div class="auth-form-group">
+                        <label for="authEmail">Email</label>
+                        <input type="email" id="authEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="auth-form-group">
+                        <label for="authPassword">Password</label>
+                        <input type="password" id="authPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="auth-btn" id="authSubmitBtn">Sign In</button>
+                </form>
+                <div class="auth-switch" id="authSwitchText">
+                    New to RateHub? <span id="authSwitchBtn">Create an account</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Toggle Button -->
         <div class="chat-toggle" id="chatToggle">
-            <span class="chat-icon">💬</span>
-            <span class="chat-text">Chat</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
         </div>
 
         <!-- Chatbot -->
         <div id="chatbot" class="chatbot">
             <div class="chatbot-header">
-                <span>🤖 Movie Assistant</span>
+                <span>RateHub Assistant</span>
+                <span class="close-chat" id="closeChat">×</span>
             </div>
             <div id="chatWindow" class="chat-window">
                 <div id="chatMessages" class="chat-messages">
-                    <div class="bot-message">Hi! Ask me about any movie details like "Tell me about Inception" or "What's the plot of Avatar?"</div>
+                    <div class="bot-message">Hi! Ask me about any movie details like "Tell me about Inception" or
+                        "What's the plot of Avatar?"</div>
                 </div>
-                <div class="chat-input">
+                <div class="chat-input-area">
                     <input type="text" id="chatInput" placeholder="Ask about a movie...">
                     <button id="sendBtn">Send</button>
                 </div>
@@ -144,10 +248,73 @@
         </div>
     </main>
 
-    <footer>
-        <p>&copy; 2025 RateHub by Tharun. </p>
+    <footer class="imdb-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h2 class="logo">RateHub</h2>
+                    <p class="brand-desc">Your ultimate destination for discovering, tracking, and reviewing the world's
+                        best movies. Join our community of film enthusiasts.</p>
+                </div>
+                <div class="footer-links">
+                    <h3>Explore</h3>
+                    <ul>
+                        <li><a href="#">Top Rated Movies</a></li>
+                        <li><a href="#">Most Popular</a></li>
+                        <li><a href="#">New Releases</a></li>
+                        <li><a href="#">Coming Soon</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h3>Contact Us</h3>
+                    <p>contact@ratehub.com</p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon" title="Facebook">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-icon" title="Twitter">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z">
+                                </path>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-icon" title="Instagram">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-icon" title="YouTube">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z">
+                                </path>
+                                <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#fff"></polygon>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 RateHub by Tharun. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
 
     <script src="script.js"></script>
 </body>
+
 </html>
