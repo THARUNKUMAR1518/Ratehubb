@@ -1,7 +1,7 @@
 class MovieApp {
     constructor() {
         this.apiKey = '3fd2be6f0c70a2a598f084ddfb75487c'; // Free TMDb API key
-        this.baseUrl = 'https://api.themoviedb.org/3';
+        this.baseUrl = 'https://corsproxy.io/?https://api.themoviedb.org/3';
         this.imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
         this.moviesGrid = document.getElementById('moviesGrid');
         this.searchInput = document.getElementById('searchInput');
@@ -28,7 +28,7 @@ class MovieApp {
         this.moodFilter = document.getElementById('moodFilter');
         this.awardsFilter = document.getElementById('awardsFilter');
         this.moviesTitle = document.getElementById('moviesTitle');
-        
+
         this.init();
     }
 
@@ -53,39 +53,39 @@ class MovieApp {
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => this.switchView(btn.dataset.view));
         });
-        
+
         document.querySelector('.close').addEventListener('click', () => {
             this.modal.style.display = 'none';
         });
-        
+
         window.addEventListener('click', (e) => {
             if (e.target === this.modal) {
                 this.modal.style.display = 'none';
             }
         });
-        
+
         // Chatbot events
         document.getElementById('chatToggle').addEventListener('click', () => {
             this.toggleChat();
         });
-        
+
         document.getElementById('sendBtn').addEventListener('click', () => {
             this.sendMessage();
         });
-        
+
         this.chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.sendMessage();
         });
-        
+
         // Filter events
         document.getElementById('applyFilters').addEventListener('click', () => {
             this.applyFiltersAndRender();
         });
-        
+
         document.getElementById('clearFilters').addEventListener('click', () => {
             this.clearFilters();
         });
-        
+
         // Filter toggle events
         document.getElementById('filterToggle').addEventListener('click', () => {
             this.toggleFilters();
@@ -285,7 +285,7 @@ class MovieApp {
                 fetch(`${this.baseUrl}/movie/${movieId}/watch/providers?api_key=${this.apiKey}`),
                 fetch(`${this.baseUrl}/movie/${movieId}/release_dates?api_key=${this.apiKey}`)
             ]);
-            
+
             const movie = await movieResponse.json();
             const credits = await creditsResponse.json();
             const reviews = await reviewsResponse.json();
@@ -293,17 +293,17 @@ class MovieApp {
             const similar = await similarResponse.json();
             const providers = await providersResponse.json();
             const releases = await releasesResponse.json();
-            
+
             // Get awards data from OMDB API as backup
             const awards = await this.fetchAwardsData(movie.title, movie.release_date);
-            
+
             return { movie, credits, reviews, awards, videos, similar, providers, releases };
         } catch (error) {
             console.error('Error fetching movie details:', error);
             return null;
         }
     }
-    
+
     async fetchAwardsData(title, releaseDate) {
         try {
             const year = new Date(releaseDate).getFullYear();
@@ -334,13 +334,13 @@ class MovieApp {
         const card = document.createElement('div');
         card.className = 'movie-card';
         card.onclick = () => this.showMovieDetails(movie.id);
-        
+
         const posterUrl = movie.poster_path ? `${this.imageBaseUrl}${movie.poster_path}` : 'https://via.placeholder.com/300x450?text=No+Image';
         const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
         const year = movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A';
         const stars = this.renderStars(movie.vote_average);
         const isWatchlisted = this.isInWatchlist(movie.id);
-        
+
         card.innerHTML = `
             <img src="${posterUrl}" alt="${movie.title}" class="movie-poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
             <div class="movie-info">
@@ -365,7 +365,7 @@ class MovieApp {
             watchlistBtn.classList.toggle('active', this.isInWatchlist(movie.id));
             watchlistBtn.textContent = this.isInWatchlist(movie.id) ? '❤️ Saved' : '🤍 Watchlist';
         });
-        
+
         return card;
     }
 
@@ -419,13 +419,13 @@ class MovieApp {
         this.modal.style.display = 'block';
         const modalContent = document.getElementById('movieDetails');
         modalContent.innerHTML = '<div style="text-align: center; padding: 2rem;">Loading...</div>';
-        
+
         const data = await this.fetchMovieDetails(movieId);
         if (!data) {
             modalContent.innerHTML = '<div style="text-align: center; color: #e74c3c;">Failed to load movie details</div>';
             return;
         }
-        
+
         const { movie, credits, reviews, awards, videos, similar, providers, releases } = data;
         const posterUrl = movie.poster_path ? `${this.imageBaseUrl}${movie.poster_path}` : 'https://via.placeholder.com/300x450?text=No+Image';
         const director = credits.crew.find(person => person.job === 'Director');
@@ -439,10 +439,10 @@ class MovieApp {
         const certification = this.getCertification(releases);
         const ratingPercent = Math.round(((movie.vote_average || 0) / 10) * 100);
         const userRating = this.getUserRating(movie.id);
-        
+
         // Create 5-line summary
         const summary = this.createMovieSummary(movie);
-        
+
         // Awards and nominations
         let awardsHtml = '';
         if (awards && awards.Awards && awards.Awards !== 'N/A') {
@@ -480,7 +480,7 @@ class MovieApp {
                 `;
             }
         }
-        
+
         let reviewsHtml = '';
         if (reviews.results && reviews.results.length > 0) {
             reviewsHtml = `
@@ -510,14 +510,14 @@ class MovieApp {
                 <div class="cast-title">Similar Movies:</div>
                 <div class="similar-grid">
                     ${similarMovies.map(item => {
-                        const img = item.poster_path ? `${this.imageBaseUrl}${item.poster_path}` : 'https://via.placeholder.com/200x300?text=No+Image';
-                        return `
+            const img = item.poster_path ? `${this.imageBaseUrl}${item.poster_path}` : 'https://via.placeholder.com/200x300?text=No+Image';
+            return `
                             <div class="similar-card" data-id="${item.id}">
                                 <img src="${img}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/200x300?text=No+Image'">
                                 <div class="similar-title">${item.title}</div>
                             </div>
                         `;
-                    }).join('')}
+        }).join('')}
                 </div>
             </div>
         ` : '';
@@ -577,7 +577,7 @@ class MovieApp {
                 <div>No OTT info available.</div>
             </div>
         `;
-        
+
         modalContent.innerHTML = `
             <div class="movie-details">
                 <img src="${posterUrl}" alt="${movie.title}" class="movie-poster-large" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
@@ -606,7 +606,7 @@ class MovieApp {
                         </div>
                         <div class="user-rating" data-movie-id="${movie.id}">
                             <span>Your Rating:</span>
-                            ${[1,2,3,4,5,6,7,8,9,10].map(value => `
+                            ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(value => `
                                 <button class="star-btn ${userRating >= value ? 'active' : ''}" data-rating="${value}">★</button>
                             `).join('')}
                             <span>${userRating ? userRating + '/10' : 'Not rated'}</span>
@@ -705,7 +705,7 @@ class MovieApp {
         this.updateResultsCount(0);
         this.toggleLoadMore(false);
     }
-    
+
     createMovieSummary(movie) {
         const plot = movie.overview || 'No plot available';
         const sentences = plot.split('. ').slice(0, 5);
@@ -829,18 +829,18 @@ class MovieApp {
 
         return null;
     }
-    
+
     async sendMessage() {
         const message = this.chatInput.value.trim();
         if (!message) return;
-        
+
         this.addMessage(message, 'user');
         this.chatInput.value = '';
-        
+
         const response = await this.processMovieQuery(message);
         this.addMessage(response, 'bot');
     }
-    
+
     addMessage(message, type) {
         const messageDiv = document.createElement('div');
         messageDiv.className = type === 'user' ? 'user-message' : 'bot-message';
@@ -848,7 +848,7 @@ class MovieApp {
         this.chatMessages.appendChild(messageDiv);
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }
-    
+
     async processMovieQuery(query) {
         const lowerQuery = query.toLowerCase();
 
@@ -937,14 +937,14 @@ class MovieApp {
             return null;
         }
     }
-    
+
     parseAwards(awardsText) {
         const won = [];
         const nominated = [];
-        
+
         // Parse awards text to separate wins and nominations
         const parts = awardsText.split(/\.|,|&/);
-        
+
         parts.forEach(part => {
             const trimmed = part.trim();
             if (trimmed.toLowerCase().includes('won') || trimmed.toLowerCase().includes('winner')) {
@@ -956,14 +956,14 @@ class MovieApp {
                 nominated.push(trimmed);
             }
         });
-        
+
         return { won, nominated };
     }
-    
+
     generateMockAwards(movie) {
         const rating = movie.vote_average;
         const year = new Date(movie.release_date).getFullYear();
-        
+
         if (rating >= 8.0) {
             return `
                 <div class="awards-section">
@@ -998,14 +998,14 @@ class MovieApp {
                 </div>
             `;
         }
-        
+
         return null;
     }
-    
+
     applyFilters() {
         this.applyFiltersAndRender();
     }
-    
+
     clearFilters() {
         this.moodFilter.value = '';
         this.awardsFilter.value = '';
@@ -1014,14 +1014,14 @@ class MovieApp {
         this.displayLimit = 12;
         this.applyFiltersAndRender();
     }
-    
+
     toggleFilters() {
         const filtersSection = document.querySelector('.filters-section');
         const filterToggle = document.getElementById('filterToggle');
         const filterIcon = filterToggle.querySelector('.filter-icon');
-        
+
         filtersSection.classList.toggle('show-filters');
-        
+
         // Change icon based on visibility
         if (filtersSection.classList.contains('show-filters')) {
             filterIcon.textContent = '✖️';
@@ -1029,14 +1029,14 @@ class MovieApp {
             filterIcon.textContent = '🔍';
         }
     }
-    
+
     toggleChat() {
         const chatbot = document.getElementById('chatbot');
         const chatToggle = document.getElementById('chatToggle');
         const chatIcon = chatToggle.querySelector('.chat-icon');
-        
+
         chatbot.classList.toggle('show-chat');
-        
+
         // Change icon based on visibility
         if (chatbot.classList.contains('show-chat')) {
             chatIcon.textContent = '✖️';
@@ -1044,7 +1044,7 @@ class MovieApp {
             chatIcon.textContent = '💬';
         }
     }
-    
+
     filterByMood(movies, mood) {
         const moodGenres = {
             'happy': ['Comedy', 'Family', 'Animation', 'Musical'],
@@ -1056,12 +1056,12 @@ class MovieApp {
             'thriller': ['Thriller', 'Mystery', 'Crime'],
             'peaceful': ['Documentary', 'Family', 'Animation']
         };
-        
+
         const targetGenres = moodGenres[mood] || [];
-        
+
         return movies.filter(movie => {
             if (!movie.genre_ids) return false;
-            
+
             // Genre ID mapping (simplified)
             const genreMap = {
                 28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy',
@@ -1070,14 +1070,14 @@ class MovieApp {
                 9648: 'Mystery', 10749: 'Romance', 878: 'Science Fiction',
                 10770: 'TV Movie', 53: 'Thriller', 10752: 'War', 37: 'Western'
             };
-            
+
             const movieGenres = movie.genre_ids.map(id => genreMap[id]).filter(Boolean);
             return targetGenres.some(genre => movieGenres.includes(genre));
         });
     }
-    
+
     filterByAwards(movies, award) {
-        switch(award) {
+        switch (award) {
             case 'oscar':
             case 'golden-globe':
             case 'bafta':
@@ -1091,7 +1091,7 @@ class MovieApp {
                 return movies;
         }
     }
-    
+
     getMoodLabel(mood) {
         const labels = {
             'happy': '😊 Happy',
@@ -1105,7 +1105,7 @@ class MovieApp {
         };
         return labels[mood] || mood;
     }
-    
+
     getAwardsLabel(award) {
         const labels = {
             'oscar': '🏆 Oscar Winners',
@@ -1122,7 +1122,7 @@ class MovieApp {
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new MovieApp();
-    
+
     // Chatbot is hidden by default via CSS (no show-chat class)
     // Filters section is hidden by default via CSS (no show-filters class)
 });
