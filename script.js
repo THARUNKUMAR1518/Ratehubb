@@ -1,9 +1,9 @@
 class MovieApp {
     constructor() {
         this.apiKey = '3fd2be6f0c70a2a598f084ddfb75487c';
-        // Use CORS proxy with proper encoding
+        // Use reliable CORS proxy
         this.tmdbBaseUrl = 'https://api.themoviedb.org/3';
-        this.corsProxy = 'https://corsproxy.io/?';
+        this.corsProxy = 'https://api.allorigins.win/raw?url=';
         this.imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
         this.moviesGrid = document.getElementById('moviesGrid');
         this.searchInput = document.getElementById('searchInput');
@@ -37,7 +37,7 @@ class MovieApp {
     // Helper method to construct CORS-proxied URLs
     proxyUrl(endpoint) {
         const fullUrl = `${this.tmdbBaseUrl}${endpoint}`;
-        return `${this.corsProxy}${fullUrl}`;
+        return `${this.corsProxy}${encodeURIComponent(fullUrl)}`;
     }
 
     init() {
